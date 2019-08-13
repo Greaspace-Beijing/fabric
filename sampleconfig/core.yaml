@@ -580,9 +580,10 @@ ledger:
   blockchain:
 
   state:
-    # stateDatabase - options are "goleveldb", "CouchDB"
+    # stateDatabase - options are "goleveldb", "CouchDB", "MongoDB"
     # goleveldb - default state database stored in goleveldb.
     # CouchDB - store state database in CouchDB
+    # MongoDB - store state database in MongoDB
     stateDatabase: goleveldb
     # Limit on the number of records to return per query
     totalQueryLimit: 100000
@@ -624,6 +625,27 @@ ledger:
        # This is optional.  Creating the global changes database will require
        # additional system resources to track changes and maintain the database
        createGlobalChangesDB: false
+    mongoDBConfig:
+       # The variable can be covered on environment
+       # Default connection Url of MongoDB
+       mongoDBAddress: 127.0.0.1:27017
+       # This username must have read and write authority on MongoDB
+       username:
+       # The password is recommended to pass as an environment variable
+       # during start up (eg CORE_LEDGER_STATE_MONGODBCONFIG_PASSWORD).
+       # If it is stored here, the file must be access control protected
+       # to prevent unintended users from discovering the password.
+       password:
+       # Number of retries for MongoDB errors
+       maxRetries: 1
+       # Number of retries for MongoDB errors during peer startup
+       maxRetriesOnStartup: 12
+       # The default collectionName for MongoDB.
+       collectionName: state
+       # MongoDB request timeout.
+       requestTimeout: 35s
+       # Limit on the number of records to return per query
+       queryLimit: 1000
 
   history:
     # enableHistoryDatabase - options are true or false

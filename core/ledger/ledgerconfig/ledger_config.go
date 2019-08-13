@@ -22,6 +22,15 @@ func IsCouchDBEnabled() bool {
 	return false
 }
 
+//IsMongoDBEnabled exposes the useMongoDB variable
+func IsMongoDBEnabled() bool {
+	stateDatabase := viper.GetString("ledger.state.stateDatabase")
+	if stateDatabase == "MongoDB" {
+		return true
+	}
+	return false
+}
+
 const confPeerFileSystemPath = "peer.fileSystemPath"
 const confLedgersData = "ledgersData"
 const confLedgerProvider = "ledgerProvider"
@@ -33,6 +42,7 @@ const confChains = "chains"
 const confPvtdataStore = "pvtdataStore"
 const confTotalQueryLimit = "ledger.state.totalQueryLimit"
 const confInternalQueryLimit = "ledger.state.couchDBConfig.internalQueryLimit"
+const confMongodbQueryLimit = "ledger.state.mongoDBConfig.queryLimit"
 const confEnableHistoryDatabase = "ledger.history.enableHistoryDatabase"
 const confMaxBatchSize = "ledger.state.couchDBConfig.maxBatchUpdateSize"
 const confAutoWarmIndexes = "ledger.state.couchDBConfig.autoWarmIndexes"
@@ -101,6 +111,16 @@ func GetTotalQueryLimit() int {
 // GetInternalQueryLimit exposes the queryLimit variable
 func GetInternalQueryLimit() int {
 	internalQueryLimit := viper.GetInt(confInternalQueryLimit)
+	// if queryLimit was unset, default to 1000
+	if !viper.IsSet(confInternalQueryLimit) {
+		internalQueryLimit = 1000
+	}
+	return internalQueryLimit
+}
+
+// GetMongodbQueryLimit exposes the queryLimit variable
+func GetMongodbQueryLimit() int {
+	internalQueryLimit := viper.GetInt(confMongodbQueryLimit)
 	// if queryLimit was unset, default to 1000
 	if !viper.IsSet(confInternalQueryLimit) {
 		internalQueryLimit = 1000

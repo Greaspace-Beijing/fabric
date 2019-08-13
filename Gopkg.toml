@@ -193,3 +193,7 @@ noverify = [
 [[constraint]]
   name = "github.com/prometheus/client_golang"
   version = "0.9.0"
+
+[[constraint]]
+  name = "go.mongodb.org/mongo-driver"
+  version = "~1.0.3"
