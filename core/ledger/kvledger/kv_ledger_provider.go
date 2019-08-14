@@ -50,6 +50,7 @@ type Provider struct {
 	initializer         *ledger.Initializer
 	collElgNotifier     *collElgNotifier
 	stats               *stats
+	fileLock            *leveldbhelper.FileLock
 }
 
 // NewProvider instantiates a new Provider.
@@ -58,12 +59,18 @@ func NewProvider() (ledger.PeerLedgerProvider, error) {
 	logger.Info("Initializing ledger provider")
 	// Initialize the ID store (inventory of chainIds/ledgerIds)
 	idStore := openIDStore(ledgerconfig.GetLedgerProviderPath())
-	ledgerStoreProvider := ledgerstorage.NewProvider()
 	// Initialize the history database (index for history of values by key)
 	historydbProvider := historyleveldb.NewHistoryDBProvider()
+
+	fileLock := leveldbhelper.NewFileLock(ledgerconfig.GetFileLockPath())
+	if err := fileLock.Lock(); err != nil {
+		return nil, errors.Wrap(err, "as another peer node command is executing,"+
+			" wait for that command to complete its execution or terminate it before retrying")
+	}
+
 	logger.Info("ledger provider Initialized")
-	provider := &Provider{idStore, ledgerStoreProvider,
-		nil, historydbProvider, nil, nil, nil, nil, nil, nil}
+	provider := &Provider{idStore, nil,
+		nil, historydbProvider, nil, nil, nil, nil, nil, nil, fileLock}
 	return provider, nil
 }
 
@@ -81,6 +88,7 @@ func (provider *Provider) Initialize(initializer *ledger.Initializer) error {
 	stateListeners = append(stateListeners, configHistoryMgr)
 
 	provider.initializer = initializer
+	provider.ledgerStoreProvider = ledgerstorage.NewProvider(initializer.MetricsProvider)
 	provider.configHistoryMgr = configHistoryMgr
 	provider.stateListeners = stateListeners
 	provider.collElgNotifier = collElgNotifier
@@ -121,9 +129,7 @@ func (provider *Provider) Create(genesisBlock *common.Block) (ledger.PeerLedger,
 		panicOnErr(provider.idStore.unsetUnderConstructionFlag(), "Error while unsetting under construction flag")
 		return nil, err
 	}
-	if err := lgr.CommitWithPvtData(&ledger.BlockAndPvtData{
-		Block: genesisBlock,
-	}); err != nil {
+	if err := lgr.CommitWithPvtData(&ledger.BlockAndPvtData{Block: genesisBlock}, &ledger.CommitOptions{}); err != nil {
 		lgr.Close()
 		return nil, err
 	}
@@ -197,6 +203,7 @@ func (provider *Provider) Close() {
 	provider.historydbProvider.Close()
 	provider.bookkeepingProvider.Close()
 	provider.configHistoryMgr.Close()
+	provider.fileLock.Unlock()
 }
 
 // recoverUnderConstructionLedger checks whether the under construction flag is set - this would be the case

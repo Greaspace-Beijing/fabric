@@ -20,7 +20,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/fsouza/go-dockerclient"
+	docker "github.com/fsouza/go-dockerclient"
 	"github.com/hyperledger/fabric/integration/helpers"
 	"github.com/hyperledger/fabric/integration/nwo/commands"
 	"github.com/hyperledger/fabric/integration/nwo/fabricconfig"
@@ -178,7 +178,6 @@ func New(c *Config, rootDir string, client *docker.Client, startPort int, compon
 
 		Organizations: c.Organizations,
 		Consensus:     c.Consensus,
-		OrdererCap:    c.OrdererCap,
 		Orderers:      c.Orderers,
 		Peers:         c.Peers,
 		SystemChannel: c.SystemChannel,

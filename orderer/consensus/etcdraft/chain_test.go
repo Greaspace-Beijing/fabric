@@ -2053,7 +2053,7 @@ var _ = Describe("Chain", func() {
 				})
 
 				When("two type B config are sent back-to-back", func() {
-					It("discards the second", func() {
+					It("discards or rejects the second", func() {
 						// initial state: <1, 2, 3>
 						// first config: <1, 2, 3, 4>
 						// second config: <1, 2>
@@ -2071,7 +2071,15 @@ var _ = Describe("Chain", func() {
 						c1.support.ProcessConfigMsgReturns(configEnvRm, 1, nil)
 
 						Expect(c1.Configure(configEnvAdd, 0)).To(Succeed())
-						Expect(c1.Configure(configEnvRm, 0)).To(Succeed())
+						// If the first config tx is processed too quickly, consenter set is already altered and
+						// the second config tx would be rejected with error. Otherwise, the second config tx is
+						// going to be discarded during revalidation, instead of being explicitly rejected by
+						// `Configure`. Either way, there is only one config block being committed, which is the
+						// whole point of this test.
+						Expect(c1.Configure(configEnvRm, 0)).To(Or(
+							Succeed(),
+							MatchError("update of more than one consenter at a time is not supported, requested changes: add 0 node(s), remove 2 node(s)"),
+						))
 						network.exec(func(c *chain) {
 							Eventually(c.support.WriteConfigBlockCallCount, LongEventualTimeout).Should(Equal(1))
 							Consistently(c.support.WriteConfigBlockCallCount).Should(Equal(1))
@@ -2302,7 +2310,16 @@ var _ = Describe("Chain", func() {
 							Eventually(c.support.WriteConfigBlockCallCount, LongEventualTimeout).Should(Equal(1))
 						})
 					c1.setStepFunc(step1)
-					network.elect(2)
+
+					// elect node with higher index
+					i2, _ := c2.storage.LastIndex() // err is always nil
+					i3, _ := c3.storage.LastIndex()
+					candidate := uint64(2)
+					if i3 > i2 {
+						candidate = 3
+					}
+					network.chains[candidate].cutter.CutNext = true
+					network.elect(candidate)
 
 					_, raftmetabytes := c1.support.WriteConfigBlockArgsForCall(0)
 					meta := &common.Metadata{Value: raftmetabytes}
@@ -2325,7 +2342,6 @@ var _ = Describe("Chain", func() {
 					Eventually(c4.support.WriteConfigBlockCallCount, LongEventualTimeout).Should(Equal(1))
 
 					By("submitting new transaction to follower")
-					c2.cutter.CutNext = true
 					err = c4.Order(env, 0)
 					Expect(err).ToNot(HaveOccurred())
 
@@ -2337,12 +2353,7 @@ var _ = Describe("Chain", func() {
 					// node 1 has been stopped should not write any block
 					Consistently(c1.support.WriteBlockCallCount).Should(Equal(1))
 
-					network.connect(1)
-
-					c2.clock.Increment(interval)
-					// check that former leader didn't get stuck and actually got resign signal,
-					// and once connected capable of communicating with rest of the replicas set
-					Eventually(c1.observe, LongEventualTimeout).Should(Receive(Equal(raft.SoftState{Lead: 2, RaftState: raft.StateFollower})))
+					network.join(1, true)
 					Eventually(c1.support.WriteBlockCallCount, LongEventualTimeout).Should(Equal(2))
 				})
 
@@ -2400,8 +2411,15 @@ var _ = Describe("Chain", func() {
 						network.connect(i)
 					}
 
-					By("re-elect node 2 to be a leader")
-					network.elect(2)
+					// elect node with higher index
+					i2, _ := c2.storage.LastIndex() // err is always nil
+					i3, _ := c3.storage.LastIndex()
+					candidate := uint64(2)
+					if i3 > i2 {
+						candidate = 3
+					}
+					network.chains[candidate].cutter.CutNext = true
+					network.elect(candidate)
 
 					c4.start()
 					Expect(c4.WaitReady()).To(Succeed())
@@ -2411,11 +2429,8 @@ var _ = Describe("Chain", func() {
 					Eventually(c4.support.WriteConfigBlockCallCount, LongEventualTimeout).Should(Equal(1))
 
 					By("submitting new transaction to follower")
-					c2.cutter.CutNext = true
 					err = c4.Order(env, 0)
 					Expect(err).ToNot(HaveOccurred())
-
-					c2.clock.Increment(interval)
 
 					// rest nodes are alive include a newly added, hence should write 2 blocks
 					Eventually(c1.support.WriteBlockCallCount, LongEventualTimeout).Should(Equal(2))
@@ -2456,11 +2471,17 @@ var _ = Describe("Chain", func() {
 						Eventually(c.support.WriteConfigBlockCallCount, LongEventualTimeout).Should(Equal(1))
 					})
 
-					// electing new leader
-					network.elect(2)
+					// elect node with higher index
+					i2, _ := c2.storage.LastIndex() // err is always nil
+					i3, _ := c3.storage.LastIndex()
+					candidate := uint64(2)
+					if i3 > i2 {
+						candidate = 3
+					}
+					network.chains[candidate].cutter.CutNext = true
+					network.elect(candidate)
 
 					By("submitting new transaction to follower")
-					c2.cutter.CutNext = true
 					err = c3.Order(env, 0)
 					Expect(err).ToNot(HaveOccurred())
 
@@ -3460,30 +3481,26 @@ func newChain(timeout time.Duration, channel string, dataDir string, id uint64, 
 	fakeFields := newFakeMetricsFields()
 
 	opts := etcdraft.Options{
-		RaftID:            uint64(id),
-		Clock:             clock,
-		TickInterval:      interval,
-		ElectionTick:      ELECTION_TICK,
-		HeartbeatTick:     HEARTBEAT_TICK,
-		MaxSizePerMsg:     1024 * 1024,
-		MaxInflightBlocks: 256,
-		BlockMetadata:     raftMetadata,
-		Consenters:        consenters,
-		Logger:            flogging.NewFabricLogger(zap.NewExample()),
-		MemoryStorage:     storage,
-		WALDir:            path.Join(dataDir, "wal"),
-		SnapDir:           path.Join(dataDir, "snapshot"),
-		Metrics:           newFakeMetrics(fakeFields),
+		RaftID:              uint64(id),
+		Clock:               clock,
+		TickInterval:        interval,
+		ElectionTick:        ELECTION_TICK,
+		HeartbeatTick:       HEARTBEAT_TICK,
+		MaxSizePerMsg:       1024 * 1024,
+		MaxInflightBlocks:   256,
+		BlockMetadata:       raftMetadata,
+		LeaderCheckInterval: 500 * time.Millisecond,
+		Consenters:          consenters,
+		Logger:              flogging.NewFabricLogger(zap.NewExample()),
+		MemoryStorage:       storage,
+		WALDir:              path.Join(dataDir, "wal"),
+		SnapDir:             path.Join(dataDir, "snapshot"),
+		Metrics:             newFakeMetrics(fakeFields),
 	}
 
 	support := &consensusmocks.FakeConsenterSupport{}
 	support.ChainIDReturns(channel)
-	support.SharedConfigReturns(&mockconfig.Orderer{
-		BatchTimeoutVal: timeout,
-		CapabilitiesVal: &mockconfig.OrdererCapabilities{
-			Kafka2RaftMigVal: false,
-		},
-	})
+	support.SharedConfigReturns(&mockconfig.Orderer{BatchTimeoutVal: timeout})
 
 	cutter := mockblockcutter.NewReceiver()
 	close(cutter.Block)
@@ -3896,14 +3913,23 @@ func (n *network) join(id uint64, expectLeaderChange bool) {
 
 // elect deterministically elects a node as leader
 func (n *network) elect(id uint64) {
-	c := n.chains[id]
+	n.RLock()
+	candidate := n.chains[id]
+	var followers []*chain
+	for _, c := range n.chains {
+		if c.id != id {
+			followers = append(followers, c)
+		}
+	}
+	n.RUnlock()
 
 	// Send node an artificial MsgTimeoutNow to emulate leadership transfer.
-	c.Consensus(&orderer.ConsensusRequest{Payload: utils.MarshalOrPanic(&raftpb.Message{Type: raftpb.MsgTimeoutNow})}, 0)
-	Eventually(c.observe, LongEventualTimeout).Should(Receive(StateEqual(id, raft.StateLeader)))
+	fmt.Fprintf(GinkgoWriter, "Send artificial MsgTimeoutNow to elect node %d\n", id)
+	candidate.Consensus(&orderer.ConsensusRequest{Payload: utils.MarshalOrPanic(&raftpb.Message{Type: raftpb.MsgTimeoutNow})}, 0)
+	Eventually(candidate.observe, LongEventualTimeout).Should(Receive(StateEqual(id, raft.StateLeader)))
 
 	// now observe leader change on other nodes
-	for _, c := range n.chains {
+	for _, c := range followers {
 		if c.id == id {
 			continue
 		}
@@ -3918,7 +3944,9 @@ func (n *network) elect(id uint64) {
 		}
 	}
 
+	n.Lock()
 	n.leader = id
+	n.Unlock()
 }
 
 // sets the configEnv var declared above

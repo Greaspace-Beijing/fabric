@@ -20,10 +20,20 @@ import (
 	putils "github.com/hyperledger/fabric/protos/utils"
 )
 
-var logger = flogging.MustGetLogger("historyleveldb")
+var logger historydbLogger = flogging.MustGetLogger("historyleveldb")
 
 var savePointKey = []byte{0x00}
 var emptyValue = []byte{}
+
+//go:generate counterfeiter -o fakes/historydb_logger.go -fake-name HistorydbLogger . historydbLogger
+
+// historydbLogger defines the interface for historyleveldb logging. The purpose is to allow unit tests to use a fake logger.
+type historydbLogger interface {
+	Debugf(template string, args ...interface{})
+	Errorf(template string, args ...interface{})
+	Infof(template string, args ...interface{})
+	Warnf(template string, args ...interface{})
+}
 
 // HistoryDBProvider implements interface HistoryDBProvider
 type HistoryDBProvider struct {
@@ -174,7 +184,10 @@ func (historyDB *historyDB) GetLastSavepoint() (*version.Height, error) {
 	if err != nil || versionBytes == nil {
 		return nil, err
 	}
-	height, _ := version.NewHeightFromBytes(versionBytes)
+	height, _, err := version.NewHeightFromBytes(versionBytes)
+	if err != nil {
+		return nil, err
+	}
 	return height, nil
 }
 
