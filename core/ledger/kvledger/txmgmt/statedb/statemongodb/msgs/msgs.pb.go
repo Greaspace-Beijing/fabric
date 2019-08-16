@@ -18,7 +18,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
-type VersionFieldProto struct {
+type MongoVersionFieldProto struct {
 	VersionBytes         []byte   `protobuf:"bytes,1,opt,name=version_bytes,json=versionBytes,proto3" json:"version_bytes,omitempty"`
 	Metadata             []byte   `protobuf:"bytes,2,opt,name=metadata,proto3" json:"metadata,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -26,38 +26,38 @@ type VersionFieldProto struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *VersionFieldProto) Reset()         { *m = VersionFieldProto{} }
-func (m *VersionFieldProto) String() string { return proto.CompactTextString(m) }
-func (*VersionFieldProto) ProtoMessage()    {}
-func (*VersionFieldProto) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msgs_41c2b9a37861a33d, []int{0}
+func (m *MongoVersionFieldProto) Reset()         { *m = MongoVersionFieldProto{} }
+func (m *MongoVersionFieldProto) String() string { return proto.CompactTextString(m) }
+func (*MongoVersionFieldProto) ProtoMessage()    {}
+func (*MongoVersionFieldProto) Descriptor() ([]byte, []int) {
+	return fileDescriptor_msgs_42c2b9a37861a33d, []int{0}
 }
-func (m *VersionFieldProto) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_VersionFieldProto.Unmarshal(m, b)
+func (m *MongoVersionFieldProto) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_MongoVersionFieldProto.Unmarshal(m, b)
 }
-func (m *VersionFieldProto) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_VersionFieldProto.Marshal(b, m, deterministic)
+func (m *MongoVersionFieldProto) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_MongoVersionFieldProto.Marshal(b, m, deterministic)
 }
-func (dst *VersionFieldProto) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_VersionFieldProto.Merge(dst, src)
+func (dst *MongoVersionFieldProto) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MongoVersionFieldProto.Merge(dst, src)
 }
-func (m *VersionFieldProto) XXX_Size() int {
-	return xxx_messageInfo_VersionFieldProto.Size(m)
+func (m *MongoVersionFieldProto) XXX_Size() int {
+	return xxx_messageInfo_MongoVersionFieldProto.Size(m)
 }
-func (m *VersionFieldProto) XXX_DiscardUnknown() {
-	xxx_messageInfo_VersionFieldProto.DiscardUnknown(m)
+func (m *MongoVersionFieldProto) XXX_DiscardUnknown() {
+	xxx_messageInfo_MongoVersionFieldProto.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_VersionFieldProto proto.InternalMessageInfo
+var xxx_messageInfo_MongoVersionFieldProto proto.InternalMessageInfo
 
-func (m *VersionFieldProto) GetVersionBytes() []byte {
+func (m *MongoVersionFieldProto) GetVersionBytes() []byte {
 	if m != nil {
 		return m.VersionBytes
 	}
 	return nil
 }
 
-func (m *VersionFieldProto) GetMetadata() []byte {
+func (m *MongoVersionFieldProto) GetMetadata() []byte {
 	if m != nil {
 		return m.Metadata
 	}
@@ -65,12 +65,12 @@ func (m *VersionFieldProto) GetMetadata() []byte {
 }
 
 func init() {
-	proto.RegisterType((*VersionFieldProto)(nil), "msgs.VersionFieldProto")
+	proto.RegisterType((*MongoVersionFieldProto)(nil), "msgs.MongoVersionFieldProto")
 }
 
-func init() { proto.RegisterFile("msgs.proto", fileDescriptor_msgs_41c2b9a37861a33d) }
+func init() { proto.RegisterFile("msgs.proto", fileDescriptor_msgs_42c2b9a37861a33d) }
 
-var fileDescriptor_msgs_41c2b9a37861a33d = []byte{
+var fileDescriptor_msgs_42c2b9a37861a33d = []byte{
 	// 177 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0xca, 0x2d, 0x4e, 0x2f,
 	0xd6, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x01, 0xb1, 0x95, 0x42, 0xb8, 0x04, 0xc3, 0x52,

@@ -17,7 +17,7 @@ import (
 )
 
 func encodeVersionAndMetadata(version *version.Height, metadata []byte) (string, error) {
-	msg := &msgs.VersionFieldProto{
+	msg := &msgs.MongoVersionFieldProto{
 		VersionBytes: version.ToBytes(),
 		Metadata:     metadata,
 	}
@@ -38,11 +38,14 @@ func decodeVersionAndMetadata(encodedstr string) (*version.Height, []byte, error
 	if err != nil {
 		return nil, nil, err
 	}
-	versionFieldMsg := &msgs.VersionFieldProto{}
+	versionFieldMsg := &msgs.MongoVersionFieldProto{}
 	if err = proto.Unmarshal(versionFieldBytes, versionFieldMsg); err != nil {
 		return nil, nil, err
 	}
-	ver, _ := version.NewHeightFromBytes(versionFieldMsg.VersionBytes)
+	ver, _, err := version.NewHeightFromBytes(versionFieldMsg.VersionBytes)
+	if err != nil {
+		return nil, nil, err
+	}
 	return ver, versionFieldMsg.Metadata, nil
 }
 
