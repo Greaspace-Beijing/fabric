@@ -113,9 +113,12 @@ func CreateMongoInstance(mongoDBConnectURL, id, pw string, authSource string, da
 		client, err = mongo.NewClient(options.Client().SetAuth(
 			options.Credential{Username: mongoConf.Username, Password: mongoConf.Password, AuthSource: mongoConf.AuthSource}).ApplyURI(mongoConf.URL))
 	}
-
 	mongoInstance := &MongoInstance{conf: mongoConf, client: client}
 	mongoInstance.stats = newStats(metricsProvider)
+	verifyErr := mongoInstance.VerifyMongoConfig()
+	if verifyErr != nil {
+		return nil, verifyErr
+	}
 
 	//check the MongoDB version number, return an error if the version is not at least 2.0.0
 	errVersion := mongoInstance.checkMongoDBVersion(client)

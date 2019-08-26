@@ -120,6 +120,15 @@ func TestDBBadConnectionDef(t *testing.T) {
 
 }
 
+func TestDBBadConnection(t *testing.T) {
+
+	//create a new instance and database object
+	//Limit the maxRetriesOnStartup to 3 in order to reduce time for the failure
+	_, err := CreateMongoInstance(badConnectURL, mongoDBDef.Username, mongoDBDef.Password, mongoDBDef.AuthSource,
+		mongoDBDef.DatabaseName, mongoDBDef.MaxRetries, 3, mongoDBDef.RequestTimeout, &disabled.Provider{})
+	assert.Error(t, err, "Error should have been thrown for a bad connection")
+}
+
 func TestEncodePathElement(t *testing.T) {
 
 	encodedString := encodePathElement("testelement")

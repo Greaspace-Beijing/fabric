@@ -1024,6 +1024,36 @@ func (dbclient *MongoDatabase) ListIndex() ([]*MongoIndex, error) {
 
 }
 
+//VerifyMongoConfig method provides function to verify the connection information
+func (mongoInstance *MongoInstance) VerifyMongoConfig() error {
+
+	logger.Debugf("Entering VerifyMongoConfig()")
+	defer logger.Debugf("Exiting VerifyMongoConfig()")
+
+	//set initial wait duration for retries
+	waitDuration := retryWaitTime * time.Millisecond
+
+	//get the number of retries for startup
+	maxRetriesOnStartup := mongoInstance.conf.MaxRetriesOnStartup
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+
+	for attempts := 0; attempts <= maxRetriesOnStartup; attempts++ {
+		_ = mongoInstance.client.Connect(ctx)
+		err := mongoInstance.client.Ping(ctx, nil)
+		if err != nil {
+			//Log the error with the retry count and continue
+			logger.Warningf("Retrying mongodb connect in %s. Attempt:%v  Error:%v", waitDuration.String(), attempts+1, err.Error())
+			//sleep for specified sleep time, then retry
+			time.Sleep(waitDuration)
+
+			//backoff, doubling the retry time for next attempt
+			waitDuration *= 2
+		}
+
+	}
+	return nil
+}
+
 func (ci *MongoInstance) recordMetric(startTime time.Time, dbName, api string) {
 	ci.stats.observeProcessingTime(startTime, dbName, api, "0")
 }
