@@ -754,7 +754,7 @@
   revision = "23731bf9ba556867089a9cc8db5e492ca6035fe8"
 
 [[projects]]
-  digest = "1:18099c177aa5d6ea81a2a9734b85127b54d4cff8a8cade596df5c44b6f0fbb0c"
+  digest = "1:8e7cd8b1e8b1c12a8110fed030d4380090e89ee2f4d37596ada03b1bdf377fd1"
   name = "go.mongodb.org/mongo-driver"
   packages = [
     "bson",
@@ -774,23 +774,21 @@
     "x/bsonx",
     "x/bsonx/bsoncore",
     "x/mongo/driver",
+    "x/mongo/driver/address",
     "x/mongo/driver/auth",
     "x/mongo/driver/auth/internal/gssapi",
+    "x/mongo/driver/connstring",
+    "x/mongo/driver/description",
+    "x/mongo/driver/dns",
+    "x/mongo/driver/operation",
     "x/mongo/driver/session",
     "x/mongo/driver/topology",
     "x/mongo/driver/uuid",
-    "x/network/address",
-    "x/network/command",
-    "x/network/compressor",
-    "x/network/connection",
-    "x/network/connstring",
-    "x/network/description",
-    "x/network/result",
-    "x/network/wiremessage",
+    "x/mongo/driver/wiremessage",
   ]
   pruneopts = "NUT"
-  revision = "0d1270edf53072da4da781b76d2e1db58831152f"
-  version = "v1.0.4"
+  revision = "d42ea7239f0db8a61e77191b9f2730a922459042"
+  version = "v1.1.0"
 
 [[projects]]
   digest = "1:22f696cee54865fb8e9ff91df7b633f6b8f22037a8015253c6b6a71ca82219c7"
