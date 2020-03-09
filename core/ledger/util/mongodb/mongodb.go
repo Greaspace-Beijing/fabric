@@ -544,6 +544,10 @@ func (dbclient *MongoDatabase) BatchRetrieveDocumentMetadata(keys []string) ([]*
 	//	docMetadataArray = append(docMetadataArray, docMetadata)
 	//}
 
+	if cursor == nil {
+		return docMetadataArray, nil
+	}
+
 	for cursor.Next(context.TODO()) {
 		var docMetadata = &DocMetadata{}
 		err := cursor.Decode(docMetadata)

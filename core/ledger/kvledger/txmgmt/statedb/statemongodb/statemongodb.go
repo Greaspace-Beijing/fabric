@@ -214,11 +214,12 @@ func (vdb *VersionedDB) GetState(namespace string, key string) (*statedb.Version
 		return nil, err
 	}
 	mongoDoc, _, err := db.ReadDoc(key)
-	if err != nil {
-		return nil, err
-	}
 	if mongoDoc == nil {
 		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
 	}
 
 	kv, err := mongoDocToKeyValue(mongoDoc)
