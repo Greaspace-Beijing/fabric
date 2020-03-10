@@ -20,6 +20,7 @@ import (
 	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/statedb"
 	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/statedb/statecouchdb"
 	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/statedb/stateleveldb"
+	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/statedb/statemongodb"
 	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/version"
 	"github.com/hyperledger/fabric/core/ledger/ledgerconfig"
 	"github.com/pkg/errors"
@@ -48,6 +49,10 @@ func NewCommonStorageDBProvider(bookkeeperProvider bookkeeping.Provider, metrics
 		if vdbProvider, err = statecouchdb.NewVersionedDBProvider(metricsProvider); err != nil {
 			return nil, err
 		}
+	} else if ledgerconfig.IsMongoDBEnabled() {
+		if vdbProvider, err = statemongodb.NewVersionedDBProvider(metricsProvider); err != nil {
+			return nil, err
+		}
 	} else {
 		vdbProvider = stateleveldb.NewVersionedDBProvider()
 	}
@@ -64,7 +69,11 @@ func NewCommonStorageDBProvider(bookkeeperProvider bookkeeping.Provider, metrics
 
 func (p *CommonStorageDBProvider) RegisterHealthChecker() error {
 	if healthChecker, ok := p.VersionedDBProvider.(healthz.HealthChecker); ok {
-		return p.HealthCheckRegistry.RegisterChecker("couchdb", healthChecker)
+		if ledgerconfig.IsCouchDBEnabled() {
+			return p.HealthCheckRegistry.RegisterChecker("couchdb", healthChecker)
+		} else if ledgerconfig.IsMongoDBEnabled() {
+			return p.HealthCheckRegistry.RegisterChecker("mongodb", healthChecker)
+		}
 	}
 	return nil
 }

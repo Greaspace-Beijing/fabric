@@ -28,6 +28,12 @@ func TestGoodIndexJSON(t *testing.T) {
 
 	err := ValidateMetadataFile(fileName, fileBytes)
 	assert.NoError(t, err, "Error validating a good index")
+
+	fileName = "META-INF/statedb/mongodb/indexes/myIndex.json"
+	fileBytes = []byte(`{"index":{"fields":["data.docType","data.owner"]},"name":"indexOwner"}`)
+
+	err = ValidateMetadataFile(fileName, fileBytes)
+	assert.NoError(t, err, "Error validating a good index")
 }
 
 func TestBadIndexJSON(t *testing.T) {
@@ -47,6 +53,19 @@ func TestBadIndexJSON(t *testing.T) {
 	assert.True(t, ok, "Should have received an InvalidIndexContentError")
 
 	t.Log("SAMPLE ERROR STRING:", err.Error())
+
+	fileName = "META-INF/statedb/mongodb/indexes/myIndex.json"
+	fileBytes = []byte("invalid json")
+
+	err = ValidateMetadataFile(fileName, fileBytes)
+
+	assert.Error(t, err, "Should have received an InvalidIndexContentError")
+
+	// Type assertion on InvalidIndexContentError
+	_, ok = err.(*InvalidIndexContentError)
+	assert.True(t, ok, "Should have received an InvalidIndexContentError")
+
+	t.Log("SAMPLE ERROR STRING:", err.Error())
 }
 
 func TestIndexWrongLocation(t *testing.T) {
@@ -62,6 +81,18 @@ func TestIndexWrongLocation(t *testing.T) {
 
 	// Type assertion on UnhandledDirectoryError
 	_, ok := err.(*UnhandledDirectoryError)
+	assert.True(t, ok, "Should have received an UnhandledDirectoryError")
+
+	t.Log("SAMPLE ERROR STRING:", err.Error())
+
+	fileName = "META-INF/statedb/mongodb/myIndex.json"
+	fileBytes = []byte(`{"index":{"fields":["data.docType","data.owner"]},"name":"indexOwner"`)
+
+	err = ValidateMetadataFile(fileName, fileBytes)
+	assert.Error(t, err, "Should have received an UnhandledDirectoryError")
+
+	// Type assertion on UnhandledDirectoryError
+	_, ok = err.(*UnhandledDirectoryError)
 	assert.True(t, ok, "Should have received an UnhandledDirectoryError")
 
 	t.Log("SAMPLE ERROR STRING:", err.Error())
@@ -109,6 +140,14 @@ func TestBadFilePaths(t *testing.T) {
 	fmt.Println(err)
 	assert.Error(t, err, "Should have received an error for bad META-INF directory")
 
+	// Test bad META-INF
+	fileName = "META-INF1/statedb/mongodb/indexes/test1.json"
+	fileBytes = []byte(`{"index":{"fields":["data.docType","data.owner"]},"name":"indexOwner","type":"json"}`)
+
+	err = ValidateMetadataFile(fileName, fileBytes)
+	fmt.Println(err)
+	assert.Error(t, err, "Should have received an error for bad META-INF directory")
+
 	// Test bad path length
 	fileName = "META-INF/statedb/test1.json"
 	fileBytes = []byte(`{"index":{"fields":["data.docType","data.owner"]},"name":"indexOwner","type":"json"}`)
@@ -133,6 +172,14 @@ func TestBadFilePaths(t *testing.T) {
 	fmt.Println(err)
 	assert.Error(t, err, "Should have received an error for invalid indexes directory")
 
+	// Test invalid indexes directory name
+	fileName = "META-INF/statedb/mongodb/index/test1.json"
+	fileBytes = []byte(`{"index":{"fields":["data.docType","data.owner"]},"name":"indexOwner","type":"json"}`)
+
+	err = ValidateMetadataFile(fileName, fileBytes)
+	fmt.Println(err)
+	assert.Error(t, err, "Should have received an error for invalid indexes directory")
+
 	// Test invalid collections directory name
 	fileName = "META-INF/statedb/couchdb/collection/testcoll/indexes/test1.json"
 	fileBytes = []byte(`{"index":{"fields":["data.docType","data.owner"]},"name":"indexOwner","type":"json"}`)
@@ -141,8 +188,24 @@ func TestBadFilePaths(t *testing.T) {
 	fmt.Println(err)
 	assert.Error(t, err, "Should have received an error for invalid collections directory")
 
+	// Test invalid collections directory name
+	fileName = "META-INF/statedb/mongodb/collection/testcoll/indexes/test1.json"
+	fileBytes = []byte(`{"index":{"fields":["data.docType","data.owner"]},"name":"indexOwner","type":"json"}`)
+
+	err = ValidateMetadataFile(fileName, fileBytes)
+	fmt.Println(err)
+	assert.Error(t, err, "Should have received an error for invalid collections directory")
+
 	// Test valid collections name
 	fileName = "META-INF/statedb/couchdb/collections/testcoll/indexes/test1.json"
+	fileBytes = []byte(`{"index":{"fields":["data.docType","data.owner"]},"name":"indexOwner","type":"json"}`)
+
+	err = ValidateMetadataFile(fileName, fileBytes)
+	fmt.Println(err)
+	assert.NoError(t, err, "Error should not have been thrown for a valid collection name")
+
+	// Test valid collections name
+	fileName = "META-INF/statedb/mongodb/collections/testcoll/indexes/test1.json"
 	fileBytes = []byte(`{"index":{"fields":["data.docType","data.owner"]},"name":"indexOwner","type":"json"}`)
 
 	err = ValidateMetadataFile(fileName, fileBytes)
@@ -158,7 +221,23 @@ func TestBadFilePaths(t *testing.T) {
 	assert.Error(t, err, "Should have received an error for an invalid collection name")
 
 	// Test invalid collections name
+	fileName = "META-INF/statedb/mongodb/collections/#testcoll/indexes/test1.json"
+	fileBytes = []byte(`{"index":{"fields":["data.docType","data.owner"]},"name":"indexOwner","type":"json"}`)
+
+	err = ValidateMetadataFile(fileName, fileBytes)
+	fmt.Println(err)
+	assert.Error(t, err, "Should have received an error for an invalid collection name")
+
+	// Test invalid collections name
 	fileName = "META-INF/statedb/couchdb/collections/testcoll/indexes/test1.txt"
+	fileBytes = []byte(`{"index":{"fields":["data.docType","data.owner"]},"name":"indexOwner","type":"json"}`)
+
+	err = ValidateMetadataFile(fileName, fileBytes)
+	fmt.Println(err)
+	assert.Error(t, err, "Should have received an error for an invalid file name")
+
+	// Test invalid collections name
+	fileName = "META-INF/statedb/mongodb/collections/testcoll/indexes/test1.txt"
 	fileBytes = []byte(`{"index":{"fields":["data.docType","data.owner"]},"name":"indexOwner","type":"json"}`)
 
 	err = ValidateMetadataFile(fileName, fileBytes)

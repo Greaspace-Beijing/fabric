@@ -366,6 +366,20 @@
   version = "v1.0"
 
 [[projects]]
+  digest = "1:6d494ca43e48e9a9f8895d56b8245a5764a077ea3f2062b66c79d67ef3a8d0ad"
+  name = "github.com/klauspost/compress"
+  packages = [
+    "fse",
+    "huff0",
+    "snappy",
+    "zstd",
+    "zstd/internal/xxhash",
+  ]
+  pruneopts = "NUT"
+  revision = "d4b3bb13d45b000ac3a915d4f32069a9284540bb"
+  version = "v1.10.2"
+
+[[projects]]
   branch = "master"
   digest = "1:c8a452cc8dd4ef9f857570ce2be31ca257a0928bf3c2b08cd7e11972b985c6d7"
   name = "github.com/konsorten/go-windows-terminal-sequences"
@@ -720,6 +734,22 @@
   version = "v1.1.9"
 
 [[projects]]
+  branch = "master"
+  digest = "1:b48c1dda664c0cab2a8edf5f58d13fd7657e4edee830f8b36626ff5c26c19f80"
+  name = "github.com/xdg/scram"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "7eeb5667e42c09cb51bf7b7c28aea8c56767da90"
+
+[[projects]]
+  branch = "master"
+  digest = "1:f251ba151fadbef161e88848eb8a249752a879e046c2d308d81deaa2086d5053"
+  name = "github.com/xdg/stringprep"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "73f8eece6fdcd902c185bf651de50f3828bed5ed"
+
+[[projects]]
   digest = "1:7994f0511ea39eb049909df41301aabf5e6289b97c1084f7cc8c351d765469e1"
   name = "go.etcd.io/etcd"
   packages = [
@@ -736,6 +766,46 @@
   ]
   pruneopts = "UT"
   revision = "23731bf9ba556867089a9cc8db5e492ca6035fe8"
+
+[[projects]]
+  digest = "1:909668060abf2a8c56548fd64c551ed556943be23f693958a994fbddce794b0b"
+  name = "go.mongodb.org/mongo-driver"
+  packages = [
+    "bson",
+    "bson/bsoncodec",
+    "bson/bsonoptions",
+    "bson/bsonrw",
+    "bson/bsontype",
+    "bson/primitive",
+    "event",
+    "internal",
+    "mongo",
+    "mongo/options",
+    "mongo/readconcern",
+    "mongo/readpref",
+    "mongo/writeconcern",
+    "tag",
+    "version",
+    "x/bsonx",
+    "x/bsonx/bsoncore",
+    "x/mongo/driver",
+    "x/mongo/driver/address",
+    "x/mongo/driver/auth",
+    "x/mongo/driver/auth/internal/gssapi",
+    "x/mongo/driver/connstring",
+    "x/mongo/driver/description",
+    "x/mongo/driver/dns",
+    "x/mongo/driver/mongocrypt",
+    "x/mongo/driver/mongocrypt/options",
+    "x/mongo/driver/operation",
+    "x/mongo/driver/session",
+    "x/mongo/driver/topology",
+    "x/mongo/driver/uuid",
+    "x/mongo/driver/wiremessage",
+  ]
+  pruneopts = "NUT"
+  revision = "17ea4abd2ac121376c1f782964fce1c3ee692915"
+  version = "v1.3.1"
 
 [[projects]]
   digest = "1:22f696cee54865fb8e9ff91df7b633f6b8f22037a8015253c6b6a71ca82219c7"
@@ -772,9 +842,10 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2e1733bde491e422f3c9cf7bf8b4cb3d11c867ad3017fec8897923f6106a3a51"
+  digest = "1:3bd8e1485cdc10d7969deb7992f8d99c92545b5e6fbd7b1f7013275ce61e0f51"
   name = "golang.org/x/crypto"
   packages = [
+    "pbkdf2",
     "sha3",
     "ssh/terminal",
   ]
@@ -1015,6 +1086,11 @@
     "go.etcd.io/etcd/raft/raftpb",
     "go.etcd.io/etcd/wal",
     "go.etcd.io/etcd/wal/walpb",
+    "go.mongodb.org/mongo-driver/bson",
+    "go.mongodb.org/mongo-driver/bson/primitive",
+    "go.mongodb.org/mongo-driver/mongo",
+    "go.mongodb.org/mongo-driver/mongo/options",
+    "go.mongodb.org/mongo-driver/x/bsonx",
     "go.uber.org/zap",
     "go.uber.org/zap/buffer",
     "go.uber.org/zap/zapcore",
