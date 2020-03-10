@@ -69,7 +69,7 @@ cloneSamplesRepo() {
         cd fabric-samples && git checkout v${VERSION}
     else
         echo "===> Cloning hyperledger/fabric-samples repo and checkout v${VERSION}"
-        git clone -b master https://github.com/Greaspace-Beijing/fabric-samples.git && cd fabric-samples && git checkout v${VERSION}
+        git clone -b v1.4.6-mongodb https://github.com/Greaspace-Beijing/fabric-samples.git && cd fabric-samples && git checkout v${VERSION}
     fi
 }
 
