@@ -29,11 +29,18 @@ printHelp() {
 
 dockerFabricPull() {
   local FABRIC_TAG=$1
-  for IMAGES in peer orderer ccenv javaenv tools; do
+  # for IMAGES in peer orderer ccenv javaenv tools; do
+  for IMAGES in orderer ccenv javaenv; do
       echo "==> FABRIC IMAGE: $IMAGES"
       echo
       docker pull hyperledger/fabric-$IMAGES:$FABRIC_TAG
       docker tag hyperledger/fabric-$IMAGES:$FABRIC_TAG hyperledger/fabric-$IMAGES
+  done
+  for IMAGES in peer tools; do
+      echo "==> FABRIC IMAGE: $IMAGES"
+      echo
+      docker pull greaspacebj/fabric-$IMAGES:$FABRIC_TAG
+      docker tag greaspacebj/fabric-$IMAGES:$FABRIC_TAG greaspacebj/fabric-$IMAGES
   done
 }
 
@@ -45,6 +52,7 @@ dockerThirdPartyImagesPull() {
       docker pull hyperledger/fabric-$IMAGES:$THIRDPARTY_TAG
       docker tag hyperledger/fabric-$IMAGES:$THIRDPARTY_TAG hyperledger/fabric-$IMAGES
   done
+  docker pull hyperledger/mongo:latest
 }
 
 dockerCaPull() {
@@ -69,7 +77,7 @@ samplesInstall() {
     cd fabric-samples && git checkout v${VERSION}
   else
     echo "===> Cloning hyperledger/fabric-samples repo and checkout v${VERSION}"
-    git clone -b master https://github.com/hyperledger/fabric-samples.git && cd fabric-samples && git checkout v${VERSION}
+    git clone -b master https://github.com/Greaspace-Beijing/fabric-samples.git && cd fabric-samples && git checkout v${VERSION}
   fi
 }
 
