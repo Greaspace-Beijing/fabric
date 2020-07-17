@@ -695,7 +695,7 @@ func (scanner *queryScanner) Next() (statedb.QueryResult, error) {
 	selectedResultRecord := scanner.resultsInfo.results[scanner.paginationInfo.cursor]
 	key := selectedResultRecord.ID
 	// remove the reserved fields from MongoDB JSON and return the value and version
-	kv, err := mongoDocToKeyValue(&mongodb.MongoDoc{JSONValue: selectedResultRecord.Value, BinaryDatas: nil})
+	kv, err := mongoDocToKeyValue(&mongodb.MongoDoc{JSONValue: selectedResultRecord.Value, BinaryDatas: selectedResultRecord.BinaryDatas})
 	if err != nil {
 		return nil, err
 	}
