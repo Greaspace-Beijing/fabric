@@ -10,16 +10,17 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/hyperledger/fabric/common/metrics"
 	"github.com/hyperledger/fabric/common/util"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/x/bsonx"
-	"regexp"
-	"strconv"
-	"strings"
-	"time"
 )
 
 var expectedCollectionNamePattern = `[a-zA-Z][a-zA-Z0-9.$_()+-]*`
@@ -68,7 +69,7 @@ func Contains(src []string, value string) bool {
 // passed in here is expected to follow `[a-zA-Z][a-zA-Z0-9._()+-]*` pattern.
 //
 //This validation will simply check whether the database name matches the above pattern and will replace
-// all occurence of '$, .' by '_'. This will not cause collisions in the transformed named
+// all occurrence of '$, .' by '_'. This will not cause collisions in the transformed named
 func mapAndValidateCollectionName(collectionName string) (string, error) {
 	// test Length
 	if len(collectionName) <= 0 {
@@ -220,7 +221,8 @@ func ConstructNamespaceDBName(chainName, namespace, databaseName string) string 
 
 //checkMongoDBVersion verifies MongoDB is at least 3.4.x
 func (mongoInstance *MongoInstance) checkMongoDBVersion(client *mongo.Client) error {
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	leastSupportedVersionFloat := 3.4
 
 	mongoInstance.client.Connect(ctx)
@@ -233,7 +235,7 @@ func (mongoInstance *MongoInstance) checkMongoDBVersion(client *mongo.Client) er
 	var serverStatus bsonx.Doc
 
 	mongoInstance.client.Database("admin").RunCommand(context.Background(),
-		bsonx.Doc{{"serverStatus", bsonx.Int32(1)}}).Decode(&serverStatus)
+		bsonx.Doc{bsonx.Elem{Key: "serverStatus", Value: bsonx.Int32(1)}}).Decode(&serverStatus)
 
 	version, _ := serverStatus.LookupErr("version")
 	//split the version into parts

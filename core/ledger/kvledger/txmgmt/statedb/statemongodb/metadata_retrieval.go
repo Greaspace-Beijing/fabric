@@ -7,6 +7,7 @@ package statemongodb
 
 import (
 	"fmt"
+
 	"github.com/hyperledger/fabric/core/ledger/ledgerconfig"
 	"github.com/hyperledger/fabric/core/ledger/util/mongodb"
 )

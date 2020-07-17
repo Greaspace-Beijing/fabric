@@ -7,10 +7,11 @@ package mongodb
 
 import (
 	"encoding/hex"
+	"testing"
+
 	"github.com/hyperledger/fabric/common/metrics/disabled"
 	"github.com/hyperledger/fabric/common/util"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 //Unit test of mongodb util functionality

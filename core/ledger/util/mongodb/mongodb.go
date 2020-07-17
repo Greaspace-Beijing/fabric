@@ -10,6 +10,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
+	"strconv"
+	"strings"
+	"time"
+	"unicode/utf8"
+
 	"github.com/hyperledger/fabric/common/flogging"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
@@ -17,11 +23,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap/zapcore"
-	"net/url"
-	"strconv"
-	"strings"
-	"time"
-	"unicode/utf8"
 )
 
 var logger = flogging.MustGetLogger("mongodb")
@@ -181,8 +182,8 @@ func (dbclient *MongoDatabase) GetDatabaseInfo() (*DBInfo, error) {
 	defer dbclient.MongoInstance.recordMetric(time.Now(), colName, "GetDatabaseInfo")
 	dbStats := &DBInfo{}
 	err := client.Database(dbclient.DatabaseName).RunCommand(context.Background(),
-		bson.D{{"dbStats", 1},
-			{"scale", 1024 * 1000}}).Decode(&dbStats)
+		bson.D{primitive.E{Key: "dbStats", Value: 1},
+			primitive.E{Key: "scale", Value: 1024 * 1000}}).Decode(&dbStats)
 
 	if err != nil {
 		return nil, err
@@ -197,7 +198,8 @@ func (dbclient *MongoDatabase) GetDatabaseInfo() (*DBInfo, error) {
 
 // HealthCheck checks if the peer is able to communicate with MongoDB
 func (mongoInstance *MongoInstance) HealthCheck() error {
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	_ = mongoInstance.client.Connect(ctx)
 	err := mongoInstance.client.Ping(ctx, nil)
@@ -214,7 +216,8 @@ func (dbclient *MongoDatabase) DropDatabase() error {
 	logger.Debugf("Database Name : [%s] Entering DropDatabase()", dbName)
 
 	client := dbclient.MongoInstance.client
-	ctx, _ := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	defer cancel()
 	client.Connect(ctx)
 
 	err := client.Database(dbName).Drop(ctx)
@@ -239,7 +242,8 @@ func (dbclient *MongoDatabase) DropCollection() error {
 	logger.Debugf("Database Name : [%s] Collection Name : [%s] Entering DropCollection()", dbName, colName)
 
 	client := dbclient.MongoInstance.client
-	ctx, _ := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	defer cancel()
 	client.Connect(ctx)
 
 	err := client.Database(dbName).Collection(colName).Drop(ctx)
@@ -267,7 +271,8 @@ func (dbclient *MongoDatabase) ReadDoc(id string) (*MongoDoc, string, error) {
 	colName := dbclient.CollectionName
 	client := dbclient.MongoInstance.client
 	defer dbclient.MongoInstance.recordMetric(time.Now(), colName, "ReadDoc")
-	ctx, _ := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	defer cancel()
 	client.Connect(ctx)
 	logger.Debugf("Database Name : [%s] Collection Name : [%s] Entering ReadDoc()  id=[%s]", dbName, colName, id)
 	if !utf8.ValidString(id) {
@@ -469,7 +474,8 @@ func (dbclient *MongoDatabase) SaveDoc(id string, rev string, mongoDoc *MongoDoc
 	}
 
 	client := dbclient.MongoInstance.client
-	ctx, _ := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	defer cancel()
 	client.Connect(ctx)
 
 	//if the revision was not passed in, or if a revision conflict is detected on prior attempt,
@@ -504,7 +510,8 @@ func (dbclient *MongoDatabase) DeleteDoc(id, rev string) error {
 	dbName := dbclient.DatabaseName
 	colName := dbclient.CollectionName
 	client := dbclient.MongoInstance.client
-	ctx, _ := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	defer cancel()
 	client.Connect(ctx)
 
 	logger.Debugf("Database Name : [%s] Collection Name : [%s] Entering DeleteDoc() id=[%s]", dbName, colName, id)
@@ -527,7 +534,8 @@ func (dbclient *MongoDatabase) BatchRetrieveDocumentMetadata(keys []string) ([]*
 	dbName := dbclient.DatabaseName
 	colName := dbclient.CollectionName
 	client := dbclient.MongoInstance.client
-	ctx, _ := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	defer cancel()
 	client.Connect(ctx)
 
 	logger.Debugf("Database Name : [%s] Collection Name : [%s] Entering BatchRetrieveDocumentMetadata()  keys=%s", dbclient.DatabaseName, dbclient.CollectionName, keys)
@@ -535,7 +543,7 @@ func (dbclient *MongoDatabase) BatchRetrieveDocumentMetadata(keys []string) ([]*
 	//keymap := make(map[string]interface{})
 	//keymap["keys"] = keys
 
-	cursor, _ := client.Database(dbName).Collection(colName, nil).Find(ctx, bson.D{{idField, bson.D{{"$in", keys}}}})
+	cursor, _ := client.Database(dbName).Collection(colName, nil).Find(ctx, bson.D{primitive.E{Key: idField, Value: bson.D{primitive.E{Key: "$in", Value: keys}}}})
 
 	docMetadataArray := []*DocMetadata{}
 
@@ -569,7 +577,8 @@ func (dbclient *MongoDatabase) BatchUpdateDocuments(documents []*MongoDoc) ([]*B
 	dbName := dbclient.DatabaseName
 	colName := dbclient.CollectionName
 	client := dbclient.MongoInstance.client
-	ctx, _ := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	defer cancel()
 	client.Connect(ctx)
 
 	if logger.IsEnabledFor(zapcore.DebugLevel) {
@@ -679,7 +688,8 @@ func (dbclient *MongoDatabase) ReadDocRange(startKey, endKey string, limit int32
 	dbName := dbclient.DatabaseName
 	colName := dbclient.CollectionName
 	client := dbclient.MongoInstance.client
-	ctx, _ := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	defer cancel()
 	client.Connect(ctx)
 
 	logger.Debugf("Database Name : [%s] Collection Name : [%s] Entering ReadDocRange()  startKey=%s, endKey=%s", dbName, colName, startKey, endKey)
@@ -690,13 +700,13 @@ func (dbclient *MongoDatabase) ReadDocRange(startKey, endKey string, limit int32
 
 	//Append the startKey if provided
 	if startKey != "" && endKey != "" {
-		filter = bson.D{{"_id", bson.D{{"$gte", startKey}, {"$lt", endKey}}}}
+		filter = bson.D{primitive.E{Key: "_id", Value: bson.D{primitive.E{Key: "$gte", Value: startKey}, primitive.E{Key: "$lt", Value: endKey}}}}
 	} else {
 		if startKey != "" {
-			filter = bson.D{{"_id", bson.D{{"$gte", startKey}}}}
+			filter = bson.D{primitive.E{Key: "_id", Value: bson.D{primitive.E{Key: "$gte", Value: startKey}}}}
 		}
 		if endKey != "" {
-			filter = bson.D{{"_id", bson.D{{"$lt", endKey}}}}
+			filter = bson.D{primitive.E{Key: "_id", Value: bson.D{primitive.E{Key: "$lt", Value: endKey}}}}
 		}
 	}
 
@@ -784,7 +794,8 @@ func (dbclient *MongoDatabase) CreateIndex(indexdefinition string) (string, erro
 	dbName := dbclient.DatabaseName
 	colName := dbclient.CollectionName
 	client := dbclient.MongoInstance.client
-	ctx, _ := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	defer cancel()
 	client.Connect(ctx)
 
 	logger.Debugf("Database Name : [%s] Collection Name : [%s] Entering CreateIndex()  indexdefinition=%s", dbName, colName, indexdefinition)
@@ -877,7 +888,8 @@ func (dbclient *MongoDatabase) DropIndex(indexName string) error {
 	dbName := dbclient.DatabaseName
 	colName := dbclient.CollectionName
 	client := dbclient.MongoInstance.client
-	ctx, _ := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	defer cancel()
 	client.Connect(ctx)
 
 	logger.Debugf("Database Name : [%s] Collection Name : [%s] Entering DropIndex() index name=%s", dbName, colName, indexName)
@@ -898,7 +910,8 @@ func (dbclient *MongoDatabase) QueryDocuments(query string) ([]*QueryResult, str
 	dbName := dbclient.DatabaseName
 	colName := dbclient.CollectionName
 	client := dbclient.MongoInstance.client
-	ctx, _ := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	defer cancel()
 	client.Connect(ctx)
 
 	logger.Debugf("Database Name : [%s] Collection Name : [%s] Entering QueryDocuments() query=%s", dbName, colName, query)
@@ -998,7 +1011,8 @@ func (dbclient *MongoDatabase) ListIndex() ([]*MongoIndex, error) {
 	dbName := dbclient.DatabaseName
 	colName := dbclient.CollectionName
 	client := dbclient.MongoInstance.client
-	ctx, _ := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), dbclient.MongoInstance.conf.RequestTimeout)
+	defer cancel()
 	client.Connect(ctx)
 
 	logger.Debugf("Database Name : [%s] Collection Name : [%s] Entering ListIndex()", dbName, colName)
@@ -1039,8 +1053,8 @@ func (mongoInstance *MongoInstance) VerifyMongoConfig() error {
 
 	//get the number of retries for startup
 	maxRetriesOnStartup := mongoInstance.conf.MaxRetriesOnStartup
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	for attempts := 0; attempts <= maxRetriesOnStartup; attempts++ {
 		_ = mongoInstance.client.Connect(ctx)
 		err := mongoInstance.client.Ping(ctx, nil)
