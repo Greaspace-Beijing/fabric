@@ -3,9 +3,13 @@
 
 package common // import "github.com/hyperledger/fabric/protos/common"
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
+import (
+	fmt "fmt"
+
+	proto "github.com/golang/protobuf/proto"
+
+	math "math"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -459,7 +463,9 @@ func init() {
 	proto.RegisterType((*CollectionCriteria)(nil), "common.CollectionCriteria")
 }
 
-func init() { proto.RegisterFile("common/collection.proto", fileDescriptor_collection_12a2cf6632dc7d83) }
+func init() {
+	proto.RegisterFile("common/collection.proto", fileDescriptor_collection_12a2cf6632dc7d83)
+}
 
 var fileDescriptor_collection_12a2cf6632dc7d83 = []byte{
 	// 480 bytes of a gzipped FileDescriptorProto

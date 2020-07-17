@@ -6,9 +6,10 @@ SPDX-License-Identifier: Apache-2.0
 package statemongodb
 
 import (
+	"testing"
+
 	"github.com/hyperledger/fabric/common/metrics/disabled"
 	"github.com/stretchr/testify/assert"
-	"testing"
 
 	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/statedb"
 )

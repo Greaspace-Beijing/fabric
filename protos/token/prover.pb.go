@@ -3,13 +3,17 @@
 
 package token // import "github.com/hyperledger/fabric/protos/token"
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
-import timestamp "github.com/golang/protobuf/ptypes/timestamp"
-
 import (
+	fmt "fmt"
+
+	proto "github.com/golang/protobuf/proto"
+
+	math "math"
+
+	timestamp "github.com/golang/protobuf/ptypes/timestamp"
+
 	context "golang.org/x/net/context"
+
 	grpc "google.golang.org/grpc"
 )
 

@@ -3,14 +3,19 @@
 
 package peer // import "github.com/hyperledger/fabric/protos/peer"
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
-import _ "github.com/golang/protobuf/ptypes/timestamp"
-import common "github.com/hyperledger/fabric/protos/common"
-
 import (
+	fmt "fmt"
+
+	proto "github.com/golang/protobuf/proto"
+
+	math "math"
+
+	_ "github.com/golang/protobuf/ptypes/timestamp"
+
+	common "github.com/hyperledger/fabric/protos/common"
+
 	context "golang.org/x/net/context"
+
 	grpc "google.golang.org/grpc"
 )
 

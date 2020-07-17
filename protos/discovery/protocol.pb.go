@@ -3,14 +3,19 @@
 
 package discovery // import "github.com/hyperledger/fabric/protos/discovery"
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
-import gossip "github.com/hyperledger/fabric/protos/gossip"
-import msp "github.com/hyperledger/fabric/protos/msp"
-
 import (
+	fmt "fmt"
+
+	proto "github.com/golang/protobuf/proto"
+
+	math "math"
+
+	gossip "github.com/hyperledger/fabric/protos/gossip"
+
+	msp "github.com/hyperledger/fabric/protos/msp"
+
 	context "golang.org/x/net/context"
+
 	grpc "google.golang.org/grpc"
 )
 

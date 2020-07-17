@@ -7,9 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 package mongodb
 
 import (
-	"github.com/spf13/viper"
 	"testing"
 	"time"
+
+	"github.com/spf13/viper"
 
 	"github.com/hyperledger/fabric/core/ledger/testutil"
 	"github.com/stretchr/testify/assert"

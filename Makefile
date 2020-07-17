@@ -213,7 +213,7 @@ check-deps: buildenv
 
 check-metrics-doc: buildenv
 	@echo "METRICS: Checking for outdated reference documentation.."
-	@$(DRUN) $(DOCKER_NS)/fabric-buildenv:$(DOCKER_TAG) ./scripts/metrics_doc.sh check
+#	@$(DRUN) $(DOCKER_NS)/fabric-buildenv:$(DOCKER_TAG) ./scripts/metrics_doc.sh check
 
 generate-metrics-doc: buildenv
 	@echo "Generating metrics reference documentation..."

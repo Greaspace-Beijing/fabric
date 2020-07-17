@@ -33,7 +33,7 @@ import (
 	"github.com/hyperledger/fabric/common/tools/configtxgen/encoder"
 	genesisconfig "github.com/hyperledger/fabric/common/tools/configtxgen/localconfig"
 	"github.com/hyperledger/fabric/common/util"
-	"github.com/hyperledger/fabric/core/cclifecycle"
+	cc "github.com/hyperledger/fabric/core/cclifecycle"
 	lifecyclemocks "github.com/hyperledger/fabric/core/cclifecycle/mocks"
 	"github.com/hyperledger/fabric/core/comm"
 	"github.com/hyperledger/fabric/core/common/ccprovider"

@@ -8,6 +8,13 @@ package statemongodb
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"testing"
+	"time"
+
 	"github.com/hyperledger/fabric/common/flogging"
 	"github.com/hyperledger/fabric/common/ledger/testutil"
 	"github.com/hyperledger/fabric/core/common/ccprovider"
@@ -17,12 +24,6 @@ import (
 	"github.com/hyperledger/fabric/core/ledger/util/mongodb"
 	"github.com/hyperledger/fabric/integration/runner"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
-	"testing"
-	"time"
 
 	ledgertestutil "github.com/hyperledger/fabric/core/ledger/testutil"
 	"github.com/spf13/viper"

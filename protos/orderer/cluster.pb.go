@@ -3,13 +3,17 @@
 
 package orderer // import "github.com/hyperledger/fabric/protos/orderer"
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
-import common "github.com/hyperledger/fabric/protos/common"
-
 import (
+	fmt "fmt"
+
+	proto "github.com/golang/protobuf/proto"
+
+	math "math"
+
+	common "github.com/hyperledger/fabric/protos/common"
+
 	context "golang.org/x/net/context"
+
 	grpc "google.golang.org/grpc"
 )
 

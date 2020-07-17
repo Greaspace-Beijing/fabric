@@ -1,16 +1,23 @@
+/*
+Copyright IBM Corp. All Rights Reserved.
+
+SPDX-License-Identifier: Apache-2.0
+*/
+
 package mongodb
 
 import (
 	"fmt"
+	"os"
+	"testing"
+	"time"
+
 	"github.com/hyperledger/fabric/common/flogging"
 	"github.com/hyperledger/fabric/common/metrics/disabled"
 	ledgertestutil "github.com/hyperledger/fabric/core/ledger/testutil"
 	"github.com/hyperledger/fabric/integration/runner"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
-	"time"
 )
 
 const badConnectURL = "mongodb:2701"

@@ -3,11 +3,17 @@
 
 package peer // import "github.com/hyperledger/fabric/protos/peer"
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
-import _ "github.com/golang/protobuf/ptypes/timestamp"
-import common "github.com/hyperledger/fabric/protos/common"
+import (
+	fmt "fmt"
+
+	proto "github.com/golang/protobuf/proto"
+
+	math "math"
+
+	_ "github.com/golang/protobuf/ptypes/timestamp"
+
+	common "github.com/hyperledger/fabric/protos/common"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -473,7 +479,9 @@ func init() {
 	proto.RegisterEnum("protos.MetaDataKeys", MetaDataKeys_name, MetaDataKeys_value)
 }
 
-func init() { proto.RegisterFile("peer/transaction.proto", fileDescriptor_transaction_4fbd1a0e1a50cfab) }
+func init() {
+	proto.RegisterFile("peer/transaction.proto", fileDescriptor_transaction_4fbd1a0e1a50cfab)
+}
 
 var fileDescriptor_transaction_4fbd1a0e1a50cfab = []byte{
 	// 877 bytes of a gzipped FileDescriptorProto

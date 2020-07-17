@@ -3,11 +3,17 @@
 
 package transientstore // import "github.com/hyperledger/fabric/protos/transientstore"
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
-import common "github.com/hyperledger/fabric/protos/common"
-import rwset "github.com/hyperledger/fabric/protos/ledger/rwset"
+import (
+	fmt "fmt"
+
+	proto "github.com/golang/protobuf/proto"
+
+	math "math"
+
+	common "github.com/hyperledger/fabric/protos/common"
+
+	rwset "github.com/hyperledger/fabric/protos/ledger/rwset"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal

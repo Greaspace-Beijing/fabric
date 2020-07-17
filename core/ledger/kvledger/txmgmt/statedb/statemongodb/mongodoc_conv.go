@@ -8,10 +8,11 @@ package statemongodb
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/hyperledger/fabric/core/ledger/util/mongodb"
-	"go.mongodb.org/mongo-driver/bson"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/hyperledger/fabric/core/ledger/util/mongodb"
+	"go.mongodb.org/mongo-driver/bson"
 
 	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/statedb"
 	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/version"

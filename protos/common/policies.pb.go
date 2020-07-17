@@ -3,10 +3,15 @@
 
 package common // import "github.com/hyperledger/fabric/protos/common"
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
-import msp "github.com/hyperledger/fabric/protos/msp"
+import (
+	fmt "fmt"
+
+	proto "github.com/golang/protobuf/proto"
+
+	math "math"
+
+	msp "github.com/hyperledger/fabric/protos/msp"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
