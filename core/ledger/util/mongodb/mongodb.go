@@ -318,15 +318,23 @@ func (dbclient *MongoDatabase) ReadDoc(id string) (*MongoDoc, string, error) {
 			continue
 		}
 
+		// fixed mongodb attach number types bug by liyi
 		if value.Value().IsNumber() {
 			if _, ok := value.Value().Int64OK(); ok {
 				jsonValue[key] = value.Value().Int64()
-			}
-			if _, ok := value.Value().Int32OK(); ok {
+			} else if _, ok := value.Value().Int32OK(); ok {
 				jsonValue[key] = int64(value.Value().Int32())
+			} else if _, ok := value.Value().Decimal128OK(); ok {
+				jsonValue[key] = value.Value().Decimal128()
+			} else if _, ok := value.Value().DoubleOK(); ok {
+				jsonValue[key] = float64(value.Value().Double())
 			}
+		} else if _, ok := value.Value().DocumentOK(); ok {
+			//unmarshal the BSON component of the MongoDoc into the document
+			jsonBytes, _ := bson.MarshalExtJSON(value.Value().Document(), false, false)
+			jsonValue[key] = string(jsonBytes[:])
 		} else {
-			jsonValue[key] = value.Value().String()
+			jsonValue[key] = strings.Trim(value.Value().String(), `"`)
 		}
 	}
 
@@ -754,14 +762,22 @@ func (dbclient *MongoDatabase) ReadDocRange(startKey, endKey string, limit int32
 				continue
 			}
 
+			// fixed mongodb attach number types bug by liyi
 			if value.Value().IsNumber() {
 				if _, ok := value.Value().Int64OK(); ok {
 					jsonValue[key] = value.Value().Int64()
-				} else {
-					jsonValue[key] = value.Value().Int32()
+				} else if _, ok := value.Value().Int32OK(); ok {
+					jsonValue[key] = int64(value.Value().Int32())
+				} else if _, ok := value.Value().Decimal128OK(); ok {
+					jsonValue[key] = value.Value().Decimal128()
+				} else if _, ok := value.Value().DoubleOK(); ok {
+					jsonValue[key] = float64(value.Value().Double())
 				}
+			} else if _, ok := value.Value().DocumentOK(); ok {
+				//unmarshal the BSON component of the MongoDoc into the document
+				jsonValue[key], _ = bson.MarshalExtJSON(value.Value().Document(), false, true)
 			} else {
-				jsonValue[key] = value.Value().String()
+				jsonValue[key] = strings.Trim(value.Value().String(), `"`)
 			}
 		}
 

@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 	"unicode/utf8"
@@ -221,6 +222,8 @@ func (vdb *VersionedDB) GetState(namespace string, key string) (*statedb.Version
 		vdb.lsccStateCache.setState(key, kv.VersionedValue)
 	}
 
+	// fixed mongodb attach quotes bug by liyi
+	kv.VersionedValue.Value = []byte(trimQuotes(string(kv.VersionedValue.Value)))
 	return kv.VersionedValue, nil
 }
 
@@ -718,4 +721,16 @@ func (scanner *queryScanner) GetBookmarkAndClose() string {
 	}
 	scanner.Close()
 	return retval
+}
+
+// fixed mongodb attach quotes bug
+func trimQuotes(s string) string {
+	if len(s) >= 4 {
+		if strings.Contains(s,`"{`) && strings.Contains(s,`}"`) {
+			s = strings.Replace(s,`"{`,`{`,-1)
+			s = strings.Replace(s,`}"`,`}`,-1)
+			s = strings.Replace(s,`\"`,`"`,-1)
+		}
+	}
+	return s
 }
